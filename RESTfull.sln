@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RESTfull.API", "RESTfull.API.csproj", "{B720236A-A96E-49FF-BA98-555E4CF4615F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RESTfull.Domain", "RESTfull.Domain\RESTfull.Domain.csproj", "{65BB9D27-FB44-4ABB-AD22-338950439B15}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RESTfull.Infrastructure", "RESTfull.Infrastructure\RESTfull.Infrastructure.csproj", "{DA94E5F1-EB1F-4027-BDD6-1EBCB598484E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B720236A-A96E-49FF-BA98-555E4CF4615F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B720236A-A96E-49FF-BA98-555E4CF4615F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B720236A-A96E-49FF-BA98-555E4CF4615F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B720236A-A96E-49FF-BA98-555E4CF4615F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65BB9D27-FB44-4ABB-AD22-338950439B15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65BB9D27-FB44-4ABB-AD22-338950439B15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65BB9D27-FB44-4ABB-AD22-338950439B15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65BB9D27-FB44-4ABB-AD22-338950439B15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA94E5F1-EB1F-4027-BDD6-1EBCB598484E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA94E5F1-EB1F-4027-BDD6-1EBCB598484E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA94E5F1-EB1F-4027-BDD6-1EBCB598484E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA94E5F1-EB1F-4027-BDD6-1EBCB598484E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

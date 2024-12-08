@@ -1,0 +1,6 @@
+@ModuleHeritageHub.API_HostAddress = http://localhost:5244
+
+GET {{ModuleHeritageHub.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

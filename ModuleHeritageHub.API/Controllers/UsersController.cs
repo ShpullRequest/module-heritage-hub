@@ -8,14 +8,14 @@ namespace ModuleHeritageHub.API.Controllers
     {
         public UsersController() { }
 
-        [HttpGet]
+        [HttpGet("me")]
         public async Task<IActionResult> GetMe()
         {
             await Task.Delay(1000);
             return Ok();
         }
 
-        [HttpPut]
+        [HttpPut("me")]
         public async Task<IActionResult> UpdateMe()
         {
             await Task.Delay(1000);

@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using ModuleHeritageHub.Domain.Model;
 
@@ -14,7 +13,7 @@ namespace ModuleHeritageHub.Infrastructure.DB
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-             base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder);
 
              modelBuilder.Entity<User>()
                 .HasIndex(u => u.Login)

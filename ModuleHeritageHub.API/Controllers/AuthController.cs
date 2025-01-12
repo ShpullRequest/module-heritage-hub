@@ -1,25 +1,66 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ModuleHeritageHub.Domain.DTO;
+using ModuleHeritageHub.Infrastructure.Repository;
+using Npgsql;
 
 namespace ModuleHeritageHub.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController(UserRepository userRepository) : ControllerBase
     {
-        public AuthController() { }
-
         [HttpPost("register")]
-        public async Task<IActionResult> Register()
+        public async Task<IActionResult> Register([FromBody] RegisterDTO data)
         {
-            await Task.Delay(1000);
-            return Created("/api/users/1", null);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            
+            AuthDTO result;
+            try 
+            {
+                result = await userRepository.RegisterUser(data.Login, data.Password, data.Role);
+            } 
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException psqlException
+                                && psqlException.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                return Conflict();
+            } 
+            catch (System.Exception) 
+            {
+                return Problem();
+            }
+
+
+            return Created("/api/users/me", result);
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login() 
+        public async Task<IActionResult> Login([FromBody] LoginDTO data) 
         {
-            await Task.Delay(1000);
-            return Ok();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            AuthDTO result;
+            try
+            {
+                result = await userRepository.LoginUser(data.Login, data.Password);
+            } 
+            catch (UnauthorizedAccessException) {
+                return Unauthorized();
+            }
+            catch (System.Exception) 
+            {
+                return Problem();
+            }
+
+
+            return Ok(result);
         }
     }
 }

@@ -2,8 +2,12 @@
 
 help:
 	@echo "Список команд:"
+	@echo "	make dev-run - запуск в дев окружении"
 	@echo "	make add-migrations {name} - создать миграцию"
 	@echo "	make apply-migrations - применить миграции"
+
+dev-run:
+	dotnet run --project ModuleHeritageHub.API
 
 add-migrations:
 ifeq ($(strip $(name)),)

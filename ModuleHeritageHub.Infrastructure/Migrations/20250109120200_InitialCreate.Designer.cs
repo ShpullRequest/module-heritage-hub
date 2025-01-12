@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ModuleHeritageHub.Infrastructure.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20241208202905_InitialCreate")]
+    [Migration("20250109120200_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -127,7 +127,7 @@ namespace ModuleHeritageHub.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("ImageId")
+                    b.Property<Guid?>("ImageId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("LastName")
@@ -209,8 +209,7 @@ namespace ModuleHeritageHub.Infrastructure.Migrations
                     b.HasOne("ModuleHeritageHub.Domain.Model.Image", "Image")
                         .WithMany()
                         .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Image");
                 });

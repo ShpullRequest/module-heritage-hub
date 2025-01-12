@@ -124,7 +124,7 @@ namespace ModuleHeritageHub.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("ImageId")
+                    b.Property<Guid?>("ImageId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("LastName")
@@ -206,8 +206,7 @@ namespace ModuleHeritageHub.Infrastructure.Migrations
                     b.HasOne("ModuleHeritageHub.Domain.Model.Image", "Image")
                         .WithMany()
                         .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Image");
                 });

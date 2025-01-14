@@ -22,12 +22,12 @@ namespace ModuleHeritageHub.API.Controllers
             AuthDTO result;
             try 
             {
-                result = await userRepository.RegisterUser(data.Login, data.Password, data.Role);
+                result = await userRepository.Register(data.Login, data.Password, data.Role, data.FirstName, data.LastName);
             } 
             catch (DbUpdateException ex) when (ex.InnerException is PostgresException psqlException
                                 && psqlException.SqlState == PostgresErrorCodes.UniqueViolation)
             {
-                return Conflict();
+                return Problem("User with this login already registered", statusCode: StatusCodes.Status409Conflict);
             } 
             catch (System.Exception) 
             {
@@ -49,10 +49,10 @@ namespace ModuleHeritageHub.API.Controllers
             AuthDTO result;
             try
             {
-                result = await userRepository.LoginUser(data.Login, data.Password);
+                result = await userRepository.Login(data.Login, data.Password);
             } 
             catch (UnauthorizedAccessException) {
-                return Unauthorized();
+                return Forbid();
             }
             catch (System.Exception) 
             {

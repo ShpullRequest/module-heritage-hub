@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ModuleHeritageHub.API.Controllers
@@ -14,6 +16,7 @@ namespace ModuleHeritageHub.API.Controllers
             return Ok();
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("upload")]
         public async Task<IActionResult> Upload()
         {

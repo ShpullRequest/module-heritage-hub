@@ -1,22 +1,22 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using System.Net;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using ModuleHeritageHub.Domain.Config;
 using ModuleHeritageHub.Domain.DTO;
 using ModuleHeritageHub.Domain.Model;
 using ModuleHeritageHub.Infrastructure.DB;
+using ModuleHeritageHub.Infrastructure.JWT;
+using MyApp.Exceptions;
 
 namespace ModuleHeritageHub.Infrastructure.Repository
 {
-    public class UserRepository(DBContext context, IOptions<JwtConfig> jwtConfig)
+    public class UserRepository(DBContext context, Jwt jwtService)
     {
         private readonly DBContext _context = context;
-        private readonly JwtConfig _jwtConfig = jwtConfig.Value;
+        private readonly Jwt _jwtService = jwtService;
 
-        public async Task<AuthDTO> LoginUser(string login, string password)
+        public async Task<AuthDTO> Login(string login, string password)
         {
             
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Login == login) ?? throw new UnauthorizedAccessException("Invalid login or password.");
@@ -27,16 +27,18 @@ namespace ModuleHeritageHub.Infrastructure.Repository
                 throw new UnauthorizedAccessException("Invalid login or password.");
             }
 
-            return GenerateToken(user);
+            return _jwtService.Generate(user);
         }
 
-        public async Task<AuthDTO> RegisterUser(string login, string password, UserRole role)
+        public async Task<AuthDTO> Register(string login, string password, UserRole role, string firstName, string lastName)
         {
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
             var user = new User
             {
                 Login = login,
+                FirstName = firstName,
+                LastName = lastName,
                 Password = hashedPassword,
                 Role = role
             };
@@ -44,38 +46,70 @@ namespace ModuleHeritageHub.Infrastructure.Repository
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return GenerateToken(user);
+            return _jwtService.Generate(user);
         }
 
-
-        protected AuthDTO GenerateToken(User user) 
+        public async Task<UserDTO> GetById(Guid userId)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.SecretKey));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new NotFoundException("User not found");
 
-            var claims = new[]
+            return new UserDTO
             {
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Sub, user.Login),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
+                Id = user.Id,
+                Login = user.Login,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role.ToString(),
+                ImageUrl = user.Image?.Path,
+                CreatedAt = user.CreatedAt,
             };
+        }
 
-            var tokenLifetime = TimeSpan.Parse(_jwtConfig.TokenLifetime);
-            var token = new JwtSecurityToken(
-                issuer: _jwtConfig.Issuer,
-                audience: _jwtConfig.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.Add(tokenLifetime),
-                signingCredentials: credentials
-            );
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var jwt = tokenHandler.WriteToken(token);
-
-            return new AuthDTO
+        public async Task<UserDTO[]> GetList()
+        {
+            var users = await _context.Users.ToArrayAsync();
+            
+            return users.Select(u => new UserDTO
             {
-                Token = jwt,
+                Id = u.Id,
+                Login = u.Login,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Role = u.Role.ToString(),
+                ImageUrl = u.Image?.Path,
+                CreatedAt = u.CreatedAt,
+            }).ToArray();
+        }
+
+        public async Task<UserDTO> Update(Guid userId, UserUpdateDTO data)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new NotFoundException("User not found");
+            
+            user.FirstName = data.FirstName;
+            user.LastName = data.LastName;
+            user.Role = data.Role.GetValueOrDefault(UserRole.MEMBER);
+            user.ImageId = data.ImageId;
+            
+            await _context.SaveChangesAsync();
+
+            return new UserDTO
+            {
+                Id = user.Id,
+                Login = user.Login,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role.ToString(),
+                ImageUrl = user.Image?.Path,
+                CreatedAt = user.CreatedAt,
             };
+        }
+
+        public async Task Delete(Guid userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new NotFoundException("User not found");
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
         }
     }
 }

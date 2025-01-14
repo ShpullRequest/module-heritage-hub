@@ -1,8 +1,4 @@
-using System.Net;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using ModuleHeritageHub.Domain.Config;
 using ModuleHeritageHub.Domain.DTO;
 using ModuleHeritageHub.Domain.Model;
 using ModuleHeritageHub.Infrastructure.DB;
@@ -18,7 +14,6 @@ namespace ModuleHeritageHub.Infrastructure.Repository
 
         public async Task<AuthDTO> Login(string login, string password)
         {
-            
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Login == login) ?? throw new UnauthorizedAccessException("Invalid login or password.");
             
             var isPasswordValid = BCrypt.Net.BCrypt.Verify(password, user.Password);
@@ -51,7 +46,11 @@ namespace ModuleHeritageHub.Infrastructure.Repository
 
         public async Task<UserDTO> GetById(Guid userId)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new NotFoundException("User not found");
+            var user = await _context.Users
+                .Include(u => u.Image)
+                .FirstOrDefaultAsync(u => u.Id == userId) 
+                ?? throw new NotFoundException("User not found");
+
 
             return new UserDTO
             {
@@ -67,7 +66,9 @@ namespace ModuleHeritageHub.Infrastructure.Repository
 
         public async Task<UserDTO[]> GetList()
         {
-            var users = await _context.Users.ToArrayAsync();
+            var users = await _context.Users
+                .Include(u => u.Image)
+                .ToArrayAsync();
             
             return users.Select(u => new UserDTO
             {
@@ -83,7 +84,10 @@ namespace ModuleHeritageHub.Infrastructure.Repository
 
         public async Task<UserDTO> Update(Guid userId, UserUpdateDTO data)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new NotFoundException("User not found");
+            var user = await _context.Users
+                .Include(u => u.Image)
+                .FirstOrDefaultAsync(u => u.Id == userId) 
+                ?? throw new NotFoundException("User not found");
             
             user.FirstName = data.FirstName;
             user.LastName = data.LastName;
@@ -106,7 +110,10 @@ namespace ModuleHeritageHub.Infrastructure.Repository
 
         public async Task Delete(Guid userId)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new NotFoundException("User not found");
+            var user = await _context.Users
+                .Include(u => u.Image)
+                .FirstOrDefaultAsync(u => u.Id == userId) 
+                ?? throw new NotFoundException("User not found");
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ModuleHeritageHub.Infrastructure.JWT;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -15,6 +16,7 @@ builder.Services.AddScoped<Jwt>();
 builder.Services.AddScoped<JwtResolver>();
 
 builder.Services.AddDbContext<DBContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
+builder.Services.AddScoped<ImageRepository>();
 builder.Services.AddScoped<UserRepository>();
 
 builder.Services.AddControllers();
@@ -55,5 +57,22 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+var uploadPath = Path.Combine(app.Environment.ContentRootPath, "static");
+if (!Directory.Exists(uploadPath))
+{
+    Directory.CreateDirectory(uploadPath);
+}
+
+var cacheMaxAgeOneWeek = (60 * 60 * 24 * 7).ToString();
+app.UseStaticFiles(new StaticFileOptions
+{
+    RequestPath = "/static",
+    FileProvider = new PhysicalFileProvider(uploadPath),
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append("Cache-Control", $"public, max-age={cacheMaxAgeOneWeek}");
+    }
+});
 
 app.Run();

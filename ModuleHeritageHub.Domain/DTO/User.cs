@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.InteropServices;
 using ModuleHeritageHub.Domain.Model;
 
 namespace ModuleHeritageHub.Domain.DTO

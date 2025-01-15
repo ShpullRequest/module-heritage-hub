@@ -12,13 +12,7 @@ namespace ModuleHeritageHub.API.Controllers
     {
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO data)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            
+        {        
             AuthDTO result;
             try 
             {
@@ -41,11 +35,6 @@ namespace ModuleHeritageHub.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO data) 
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             AuthDTO result;
             try
             {

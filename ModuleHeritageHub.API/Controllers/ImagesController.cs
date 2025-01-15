@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ModuleHeritageHub.Domain.DTO;
-using ModuleHeritageHub.Infrastructure.JWT;
 using ModuleHeritageHub.Infrastructure.Repository;
 
 namespace ModuleHeritageHub.API.Controllers

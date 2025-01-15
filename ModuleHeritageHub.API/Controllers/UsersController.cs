@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ModuleHeritageHub.Domain.DTO;
+using ModuleHeritageHub.Domain.Exceptions;
 using ModuleHeritageHub.Domain.Model;
 using ModuleHeritageHub.Infrastructure.JWT;
 using ModuleHeritageHub.Infrastructure.Repository;
-using MyApp.Exceptions;
 using Npgsql;
 
 namespace ModuleHeritageHub.API.Controllers

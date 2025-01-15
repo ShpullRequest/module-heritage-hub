@@ -17,6 +17,7 @@ builder.Services.AddScoped<JwtResolver>();
 
 builder.Services.AddDbContext<DBContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
 builder.Services.AddScoped<ImageRepository>();
+builder.Services.AddScoped<PageRepository>();
 builder.Services.AddScoped<UserRepository>();
 
 builder.Services.AddControllers();

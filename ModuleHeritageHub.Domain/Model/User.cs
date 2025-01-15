@@ -2,7 +2,6 @@ namespace ModuleHeritageHub.Domain.Model
 {
     public enum UserRole {
         MEMBER,
-        EDITOR,
         ADMIN
     }
 

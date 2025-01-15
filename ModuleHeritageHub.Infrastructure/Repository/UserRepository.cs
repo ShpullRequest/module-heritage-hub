@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using ModuleHeritageHub.Domain.DTO;
+using ModuleHeritageHub.Domain.Exceptions;
 using ModuleHeritageHub.Domain.Model;
 using ModuleHeritageHub.Infrastructure.DB;
 using ModuleHeritageHub.Infrastructure.JWT;
-using MyApp.Exceptions;
 
 namespace ModuleHeritageHub.Infrastructure.Repository
 {
@@ -111,7 +111,6 @@ namespace ModuleHeritageHub.Infrastructure.Repository
         public async Task Delete(Guid userId)
         {
             var user = await _context.Users
-                .Include(u => u.Image)
                 .FirstOrDefaultAsync(u => u.Id == userId) 
                 ?? throw new NotFoundException("User not found");
 

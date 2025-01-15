@@ -1,6 +1,6 @@
 using System;
 
-namespace MyApp.Exceptions
+namespace ModuleHeritageHub.Domain.Exceptions
 {
     public class NotFoundException : Exception
     {

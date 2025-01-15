@@ -6,7 +6,7 @@ namespace ModuleHeritageHub.Domain.Model
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string InfoList { get; set; } = string.Empty;
-        public Guid CurrentVersionId { get; set; } = Guid.Empty;
+        public Guid? CurrentVersionId { get; set; }
         
         public PageVersion CurrentVersion { get; set; } = null!;
         public List<PageVersion> PageVersions { get; set; } = [];

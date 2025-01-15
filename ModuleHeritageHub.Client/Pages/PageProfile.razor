@@ -1,0 +1,89 @@
+@page "/profile"
+@attribute [Authorize]
+
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card text-dark bg-light shadow">
+                <div class="card-header text-center">
+                    <h3 class="mb-0">Мой профиль</h3>
+                </div>
+                <div class="card-body text-center">
+                    @if (isLoading)
+                    {
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">
+                            @errorMessage
+                        </div>
+                    }
+                    else if (user != null)
+                    {
+                        <div class="mb-4">
+                            <img src="@user.ImageUrl" 
+                                class="rounded-circle mb-3" 
+                                style="width: 120px; height: 120px;" 
+                                alt="Avatar">
+                            <h4>@user.FirstName @user.LastName</h4>
+                            <p class="text-muted">@user.Login</p>
+                            <span class="badge @(user.Role == "0" ? "bg-info" : "bg-danger")">
+                                @(user.Role == "0" ? "Пользователь" : "Администратор")
+                            </span>
+                        </div>
+                        <button class="btn btn-secondary mt-3" @onclick="GoToEditProfile">
+                            <i class="bi bi-pencil-fill"></i> Изменить профиль
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private UserDTO? user;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            user = await Http.GetFromJsonAsync<UserDTO>("/api/users/me");
+            if (user != null && string.IsNullOrEmpty(user.ImageUrl))
+            {
+                string initials = $"{user.FirstName[0]}{user.LastName[0]}".ToUpper();
+                user.ImageUrl = $"https://placehold.co/120x120@3x.png?text={initials}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка при загрузке профиля: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoToEditProfile()
+    {
+        Navigation.NavigateTo("/profile/edit");
+    }
+
+    public class UserDTO
+    {
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Login { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
+    }
+}

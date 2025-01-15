@@ -17,6 +17,7 @@ namespace ModuleHeritageHub.API.Controllers
     public class PagesController(PageRepository pageRepository, JwtResolver jwtResolver) : ControllerBase 
     {
         [HttpGet]
+        [ProducesResponseType(typeof(PageDTO[]), 200)]
         public async Task<IActionResult> Get()
         {
             PageDTO[] pages;
@@ -33,6 +34,7 @@ namespace ModuleHeritageHub.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(PageDTO), 200)]
         public async Task<IActionResult> GetById(Guid id)
         {
             PageDTO page;
@@ -53,6 +55,7 @@ namespace ModuleHeritageHub.API.Controllers
         }
 
         [HttpGet("{id}/versions")]
+        [ProducesResponseType(typeof(PageVersionDTO[]), 200)]
         public async Task<IActionResult> GetVersions(Guid id)
         {
             PageVersionDTO[] pageVersions;
@@ -74,6 +77,7 @@ namespace ModuleHeritageHub.API.Controllers
 
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = nameof(UserRole.ADMIN))]
+        [ProducesResponseType(typeof(PageDTO), 200)]
         public async Task<IActionResult> Create([FromBody] PageCreateDTO data)
         {
             PageDTO page;
@@ -97,6 +101,7 @@ namespace ModuleHeritageHub.API.Controllers
 
         [HttpPatch("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = nameof(UserRole.ADMIN))]
+        [ProducesResponseType(typeof(PageDTO), 200)]
         public async Task<IActionResult> Update(Guid id, [FromBody] PageEditDTO data)
         {
             PageDTO page;
@@ -140,6 +145,7 @@ namespace ModuleHeritageHub.API.Controllers
 
         [HttpPost("{id}/versions")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = nameof(UserRole.ADMIN))]
+        [ProducesResponseType(typeof(PageDTO), 200)]
         public async Task<IActionResult> CreateVersion(Guid id, [FromBody] PageVersionCreateEditDTO data)
         {
             PageDTO page;
@@ -167,6 +173,7 @@ namespace ModuleHeritageHub.API.Controllers
 
         [HttpPatch("{id}/versions/{versionId}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = nameof(UserRole.ADMIN))]
+        [ProducesResponseType(typeof(PageVersionDTO), 200)]
         public async Task<IActionResult> UpdateVersion(Guid id, Guid versionId, [FromBody] PageVersionCreateEditDTO data)
         {
             PageVersionDTO pageVersion;
@@ -198,6 +205,7 @@ namespace ModuleHeritageHub.API.Controllers
 
         [HttpDelete("{id}/versions/{versionId}")] 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = nameof(UserRole.ADMIN))]
+        [ProducesResponseType(typeof(PageDTO), 200)]
         public async Task<IActionResult> DeleteVersion(Guid id, Guid versionId)
         {
             PageDTO page;

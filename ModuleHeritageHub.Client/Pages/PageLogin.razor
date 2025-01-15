@@ -1,0 +1,89 @@
+@page "/login"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@inject AuthService authService
+@inject JwtAuthStateProvider authStateProvider
+
+<div class="d-flex align-items-center justify-content-center align-middle bg-light">
+    <div class="card shadow p-4" style="width: 24rem;">
+        <h3 class="text-center mb-4">Авторизация</h3>
+        <EditForm Model="@loginModel" OnValidSubmit="@HandleLogin">
+            <DataAnnotationsValidator />
+            <p class="text-danger">@errorMessage</p>
+
+            <div class="mb-3">
+                <label for="login" class="form-label">Логин</label>
+                <InputText id="login" class="form-control" @bind-Value="loginModel.Login" />
+                <ValidationMessage For="@(() => loginModel.Login)" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Пароль</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+                <ValidationMessage For="@(() => loginModel.Password)" class="text-danger" />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Войти</button>
+        </EditForm>
+        <div class="text-center mt-3">
+            Нет аккаунта? <a class="link-secondary" href="/register">Зарегистрируйтесь</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginDTO loginModel = new LoginDTO();
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var isAuth = await authService.IsAuthenticated();
+        if (isAuth)
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        errorMessage = string.Empty;
+        
+        try
+        {
+            var response = await Http.PostAsJsonAsync("/api/auth/login", loginModel);
+            if (response.IsSuccessStatusCode)
+            {
+                var resp = await response.Content.ReadFromJsonAsync<AuthDTO>();
+                string token = resp?.Token ?? "";
+
+                await authService.SetToken(token);
+                authStateProvider.MarkUserAsAuthenticated(token);
+
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = "Неверный логин или пароль.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка подключения: {ex.Message}";
+        }
+    }
+
+    public class LoginDTO
+    {
+        [Required(ErrorMessage = "Логин обязателен.")]
+        [MinLength(5, ErrorMessage = "Логин должен быть не менее 5 символов.")]
+        public string Login { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Пароль обязателен.")]
+        [MinLength(8, ErrorMessage = "Пароль должен быть не менее 8 символов.")]
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class AuthDTO
+    {
+        public string? Token { get; set; }
+    }
+}

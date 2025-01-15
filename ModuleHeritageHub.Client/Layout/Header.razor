@@ -1,0 +1,66 @@
+@inherits LayoutComponentBase
+
+@inject NavigationManager Navigation
+
+@inject AuthService authService
+@inject JwtAuthStateProvider authStateProvider
+
+<header class="sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                РуВики
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-book"></i> Статьи
+                        </a>
+                    </li>
+                    <AuthorizeView>
+                        <Authorized>
+                           <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAccount" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    @(context.User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value ?? "Пользователь")
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownAccount">
+                                    <li><a class="dropdown-item" href="/profile">Профиль</a></li>
+                                    <li><a class="dropdown-item" href="/profile/settings">Настройки</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" @onclick="HandleLogout">Выйти из аккаунта</a></li>
+                                </ul>
+                            </li> 
+                        </Authorized>
+                        <NotAuthorized>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAuth" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Авторизация
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownAuth">
+                                    <li><a class="dropdown-item" href="/login">Войти в аккаунт</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="/register">Зарегистрироваться</a></li>
+                                </ul>
+                            </li>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+@code {
+    private async Task HandleLogout() {
+        await authService.RemoveToken();
+        authStateProvider.MarkUserAsLoggedOut();
+
+        Navigation.NavigateTo("/login");
+    }
+}

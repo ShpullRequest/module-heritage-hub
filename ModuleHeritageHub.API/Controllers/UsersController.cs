@@ -17,6 +17,7 @@ namespace ModuleHeritageHub.API.Controllers
     public class UsersController(UserRepository userRepository, JwtResolver jwtResolver) : ControllerBase
     {
         [HttpGet("me")]
+        [ProducesResponseType(typeof(UserDTO), 200)]
         public async Task<IActionResult> GetMe()
         {
             UserDTO usr;
@@ -34,6 +35,7 @@ namespace ModuleHeritageHub.API.Controllers
         }
 
         [HttpPatch("me")]
+        [ProducesResponseType(typeof(UserDTO), 200)]
         public async Task<IActionResult> UpdateMe([FromBody] UserUpdateDTO data)
         {
             UserDTO usr;
@@ -56,6 +58,7 @@ namespace ModuleHeritageHub.API.Controllers
 
         [HttpGet("list")]
         [Authorize(Roles = nameof(UserRole.ADMIN))]
+        [ProducesResponseType(typeof(UserDTO[]), 200)]
         public async Task<IActionResult> GetList()
         {
             UserDTO[] users;
@@ -73,7 +76,7 @@ namespace ModuleHeritageHub.API.Controllers
 
         [HttpPatch("{id}")]
         [Authorize(Roles = nameof(UserRole.ADMIN))]
-
+        [ProducesResponseType(typeof(UserDTO), 200)]
         public async Task<IActionResult> Update(Guid id, [FromBody] UserUpdateDTO data)
         {
             UserDTO usr;
@@ -100,7 +103,6 @@ namespace ModuleHeritageHub.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = nameof(UserRole.ADMIN))]
-
         public async Task<IActionResult> Delete(Guid id)
         {
             if (id == jwtResolver.UserId) 

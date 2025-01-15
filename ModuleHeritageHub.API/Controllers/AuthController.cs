@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using ModuleHeritageHub.Domain.DTO;
 using ModuleHeritageHub.Infrastructure.Repository;
@@ -11,6 +12,7 @@ namespace ModuleHeritageHub.API.Controllers
     public class AuthController(UserRepository userRepository) : ControllerBase
     {
         [HttpPost("register")]
+        [ProducesResponseType(typeof(AuthDTO), 200)]
         public async Task<IActionResult> Register([FromBody] RegisterDTO data)
         {        
             AuthDTO result;
@@ -33,6 +35,7 @@ namespace ModuleHeritageHub.API.Controllers
         }
 
         [HttpPost("login")]
+        [ProducesResponseType(typeof(AuthDTO), 200)]
         public async Task<IActionResult> Login([FromBody] LoginDTO data) 
         {
             AuthDTO result;

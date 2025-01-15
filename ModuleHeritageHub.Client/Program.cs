@@ -1,27 +1,24 @@
-using ModuleHeritageHub.Client.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using ModuleHeritageHub.Client;
+using ModuleHeritageHub.Client.Providers;
+using ModuleHeritageHub.Client.Services;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddAuthorizationCore();
+builder.Services.AddSingleton<AuthService>();
+builder.Services.AddScoped<JwtAuthStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<JwtAuthStateProvider>());
 
-var app = builder.Build();
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
+var ApiBaseAddress = builder.Configuration["API_BASE_ADDRESS"] ?? throw new Exception("API_BASE_ADDRESS not provided in launch settings.");
+builder.Services.AddScoped<AuthMessageHandler>();
+builder.Services.AddHttpClient("ApiClient", client => client.BaseAddress = new Uri(ApiBaseAddress))
+    .AddHttpMessageHandler<AuthMessageHandler>();
+builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ApiClient"));
 
-app.UseHttpsRedirection();
-
-app.UseStaticFiles();
-app.UseAntiforgery();
-
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
-app.Run();
+await builder.Build().RunAsync();

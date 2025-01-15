@@ -12,7 +12,9 @@ namespace ModuleHeritageHub.API.Controllers
     public class ImagesController(ImageRepository imageRepository) : ControllerBase
     {
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload([FromForm] IFormFile file)
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(ImageDTO), 200)]
+        public async Task<IActionResult> Upload(IFormFile file)
         {
             if (file == null) 
             {

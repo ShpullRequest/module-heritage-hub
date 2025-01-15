@@ -3,11 +3,14 @@
 help:
 	@echo "Список команд:"
 	@echo "	make dev-run - запуск в дев окружении"
+	@echo "	make client-run - запуск клиентской части"
 	@echo "	make add-migrations {name} - создать миграцию"
 	@echo "	make apply-migrations - применить миграции"
 
 dev-run:
 	dotnet run --project ModuleHeritageHub.API
+client-run:
+	dotnet run --project ModuleHeritageHub.Client
 
 add-migrations:
 ifeq ($(strip $(name)),)

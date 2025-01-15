@@ -4,6 +4,8 @@
 @inject HttpClient Http
 @inject NavigationManager Navigation
 
+<PageTitle>Профиль</PageTitle>
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -33,8 +35,8 @@
                                 alt="Avatar">
                             <h4>@user.FirstName @user.LastName</h4>
                             <p class="text-muted">@user.Login</p>
-                            <span class="badge @(user.Role == "0" ? "bg-info" : "bg-danger")">
-                                @(user.Role == "0" ? "Пользователь" : "Администратор")
+                            <span class="badge @(user.Role == "ADMIN" ? "bg-danger" : "bg-info")">
+                                @(user.Role == "ADMIN" ? "Администратор" : "Пользователь")
                             </span>
                         </div>
                         <button class="btn btn-secondary mt-3" @onclick="GoToEditProfile">

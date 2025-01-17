@@ -31,11 +31,24 @@
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownAccount">
                                     <li><a class="dropdown-item" href="/profile">Профиль</a></li>
-                                    <li><a class="dropdown-item" href="/profile/settings">Настройки</a></li>
+                                    <li><a class="dropdown-item" href="/profile/edit">Настройки</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="#" @onclick="HandleLogout">Выйти из аккаунта</a></li>
                                 </ul>
                             </li> 
+                            @* @if (context.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value == "ADMIN") {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Администратор
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
+                                        <li style="cursor:none;">Админ-меню</li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="/admin/users">Пользователи</a></li>
+                                        <li><a class="dropdown-item" href="/admin/pages">Статьи</a></li>
+                                    </ul>
+                                </li>
+                            } *@
                         </Authorized>
                         <NotAuthorized>
                             <li class="nav-item dropdown">

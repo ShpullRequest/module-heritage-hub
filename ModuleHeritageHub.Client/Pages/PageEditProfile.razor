@@ -1,0 +1,242 @@
+@page "/profile/edit"
+@attribute [Authorize]
+
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject IConfiguration Configuration
+@inject NavigationManager Navigation
+
+<PageTitle>Редактирование профиля</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card text-dark bg-light shadow">
+                <div class="card-header text-center">
+                    <h3 class="mb-0">Редактирование профиля</h3>
+                </div>
+                <div class="card-body">
+                    @if (isLoading)
+                    {
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">
+                            @errorMessage
+                        </div>
+                    }
+                    else if (userEdit != null)
+                    {
+                        <EditForm Model="@userEdit" OnValidSubmit="HandleSave">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="text-danger" />
+
+                            <div class="mb-3 text-center position-relative">
+                                <div class="avatar-wrapper">
+                                    <img src="@userEdit.ImageUrl"
+                                        class="rounded-circle mb-3"
+                                        style="width: 120px; height: 120px; cursor: pointer;"
+                                        alt="Avatar"
+                                        @onclick="TriggerFileInput" 
+                                    />
+                                    <div class="upload-icon position-absolute top-50 start-50 translate-middle">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload text-white" style="transform: scale(2);" viewBox="0 0 16 16">
+                                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                                            <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/>
+                                        </svg>
+                                    </div>
+                                    <InputFile id="avatarUpload" style="display: none;" OnChange="HandleFileChange" />
+                                </div>
+                                @if (!string.IsNullOrEmpty(uploadError))
+                                {
+                                    <p class="text-danger">@uploadError</p>
+                                }
+                            </div>
+
+
+                            <div class="mb-3">
+                                <label for="firstName" class="form-label">Имя</label>
+                                <InputText id="firstName" class="form-control" @bind-Value="userEdit.FirstName" />
+                                <ValidationMessage For="@(() => userEdit.FirstName)" class="text-danger" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="lastName" class="form-label">Фамилия</label>
+                                <InputText id="lastName" class="form-control" @bind-Value="userEdit.LastName" />
+                                <ValidationMessage For="@(() => userEdit.LastName)" class="text-danger" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="role" class="form-label">Роль</label>
+                                <InputSelect id="role" class="form-control" @bind-Value="userEdit.Role">
+                                    <option value="0">Пользователь</option>
+                                    <option value="1">Администратор</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => userEdit.Role)" class="text-danger" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-save"></i> Сохранить изменения
+                            </button>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private UserEditDTO? userEdit;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    private string? uploadError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var user = await Http.GetFromJsonAsync<UserDTO>("/api/users/me");
+            if (user != null)
+            {
+                userEdit = new UserEditDTO
+                {
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Role = user.Role == "ADMIN" ? 1 : 0,
+                    ImageUrl = user.ImageUrl
+                };
+
+                var apiBaseAddress = Configuration["API_BASE_ADDRESS"];
+                if (!string.IsNullOrEmpty(user.ImageUrl) && !string.IsNullOrEmpty(apiBaseAddress)) {
+                    userEdit.ImageUrl = $"{apiBaseAddress}/{user.ImageUrl}";
+                } 
+                else
+                {
+                    string initials = $"{userEdit.FirstName[0]}{userEdit.LastName[0]}".ToUpper();
+                    userEdit.ImageUrl = $"https://placehold.co/120x120@3x.png?text={initials}";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка при загрузке данных профиля: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleSave()
+    {
+        try
+        {
+            var response = await Http.PatchAsJsonAsync("/api/users/me", userEdit);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/profile");
+            }
+            else
+            {
+                errorMessage = "Не удалось сохранить изменения. Попробуйте позже.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка при сохранении: {ex.Message}";
+        }
+    }
+
+    private async Task TriggerFileInput()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", "document.getElementById('avatarUpload').click()");
+    }
+
+    private async Task HandleFileChange(InputFileChangeEventArgs e)
+    {
+        uploadError = "";
+        try
+        {
+            var file = e.File;
+            Console.WriteLine(file);
+
+            if (file != null)
+            {
+                using var content = new MultipartFormDataContent();
+                var stream = file.OpenReadStream(maxAllowedSize: 16 * 1024 * 1024);
+                var fileContent = new StreamContent(stream);
+                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+
+                content.Add(fileContent, "file", file.Name);
+
+                var response = await Http.PostAsync("/api/images/upload", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<ImageDTO>();
+                    if (result != null && userEdit != null)
+                    {
+                        var apiBaseAddress = Configuration["API_BASE_ADDRESS"];
+                        if (!string.IsNullOrEmpty(apiBaseAddress) && !string.IsNullOrEmpty(result.Path))
+                        {
+                            userEdit.ImageId = result.Id;
+                            userEdit.ImageUrl = $"{apiBaseAddress}/{result.Path}";
+                        } 
+                        else 
+                        {
+                            uploadError = "Ошибка загрузки файла. Попробуйте снова.";
+                        }
+                    }
+                }
+                else
+                {
+                    uploadError = "Ошибка загрузки файла. Попробуйте снова.";
+                }
+            }
+        }
+        catch (IOException)
+        {
+            uploadError = "Размер файла превышает допустимый лимит 16 MB.";
+        }
+        catch (Exception ex)
+        {
+            uploadError = $"Ошибка: {ex.Message}";
+        }
+    }
+
+    public class ImageDTO
+    {
+        public string Id { get; set; } = string.Empty;
+        public string? Path { get; set; }
+    }
+
+    public class UserEditDTO
+    {
+        [Required(ErrorMessage = "Имя обязательно.")]
+        [MaxLength(50, ErrorMessage = "Имя не должно превышать 50 символов.")]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Фамилия обязательна.")]
+        [MaxLength(50, ErrorMessage = "Фамилия не должна превышать 50 символов.")]
+        public string LastName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Роль обязательна.")]
+        public int Role { get; set; } = 0;
+
+        public string? ImageId { get; set; } = null;
+        public string ImageUrl { get; set; } = string.Empty;
+    }
+
+    public class UserDTO
+    {
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Login { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
+    }
+}

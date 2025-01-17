@@ -101,3 +101,27 @@ a, .btn-link {
 code {
     color: #c02d76;
 }
+
+.avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 120px;
+    height: 120px;
+}
+
+.avatar-wrapper:hover .upload-icon {
+    opacity: 1;
+}
+
+.upload-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none;
+}

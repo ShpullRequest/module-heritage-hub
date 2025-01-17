@@ -2,6 +2,7 @@
 @attribute [Authorize]
 
 @inject HttpClient Http
+@inject IConfiguration Configuration
 @inject NavigationManager Navigation
 
 <PageTitle>Профиль</PageTitle>
@@ -59,11 +60,18 @@
         try
         {
             user = await Http.GetFromJsonAsync<UserDTO>("/api/users/me");
-            if (user != null && string.IsNullOrEmpty(user.ImageUrl))
+            if (user != null)
             {
-                string initials = $"{user.FirstName[0]}{user.LastName[0]}".ToUpper();
-                user.ImageUrl = $"https://placehold.co/120x120@3x.png?text={initials}";
-            }
+                var apiBaseAddress = Configuration["API_BASE_ADDRESS"];
+                if (!string.IsNullOrEmpty(user.ImageUrl) && !string.IsNullOrEmpty(apiBaseAddress)) {
+                    user.ImageUrl = $"{apiBaseAddress}/{user.ImageUrl}";
+                } 
+                else
+                {
+                    string initials = $"{user.FirstName[0]}{user.LastName[0]}".ToUpper();
+                    user.ImageUrl = $"https://placehold.co/120x120@3x.png?text={initials}";
+                }
+            } 
         }
         catch (Exception ex)
         {

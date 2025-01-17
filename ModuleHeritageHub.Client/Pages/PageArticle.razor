@@ -1,0 +1,122 @@
+@page "/articles/{id:guid}"
+
+@inject HttpClient Http
+@inject IConfiguration Configuration
+
+<PageTitle>@(article?.Title ?? "Статья")</PageTitle>
+
+<div class="container mt-5">
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">
+            @errorMessage
+        </div>
+    }
+    else if (article != null)
+    {
+        <div class="mb-5 d-flex justify-content-between align-items-center">
+            <div>
+                <h1>@article.Title</h1>
+                <p class="text-muted">@article.Description</p>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-6">
+                @if (!string.IsNullOrEmpty(apiBaseAddress) && article.Images?.Count > 1)
+                {
+                    <!-- Слайдер для нескольких изображений -->
+                    <div id="carouselArticleImages" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            @foreach (var (key, value) in article.Images.Select((kvp, i) => (i, kvp.Value)))
+                            {
+                                <div class="carousel-item @(key == 0 ? "active" : "")">
+                                    <img src="@apiBaseAddress/@value" class="d-block w-100" alt="Image @(key + 1)">
+                                </div>
+                            }
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselArticleImages" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Предыдущий</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselArticleImages" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Следующий</span>
+                        </button>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(apiBaseAddress) && article.Images?.Count == 1)
+                {
+                    <!-- Одиночное изображение -->
+                    <img src="@apiBaseAddress/@article.Images.First().Value" class="img-fluid rounded" alt="Article Image">
+                }
+            </div>
+
+            <div class="col-md-6">
+                <div class="bg-light p-3 rounded shadow-sm">
+                    <h4>Информация</h4>
+                    <ul class="list-unstyled">
+                        @foreach (var line in article.InfoList.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            <li><i class="bi bi-info-circle-fill text-primary"></i> @line</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <h3>Содержание</h3>
+            <div class="article-body">
+                @article.Body
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private ArticleDTO? article;
+    private bool isLoading = true;
+    private string? errorMessage;
+    private string apiBaseAddress = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        apiBaseAddress = Configuration["API_BASE_ADDRESS"] ?? "";
+        
+        try
+        {
+            article = await Http.GetFromJsonAsync<ArticleDTO>($"/api/pages/{Id}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка загрузки статьи: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public class ArticleDTO
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string InfoList { get; set; } = string.Empty;
+        public string Body { get; set; } = string.Empty;
+        public DateTime LastInteractionAt { get; set; }
+        public Dictionary<string, string>? Images { get; set; }
+    }
+}

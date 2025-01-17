@@ -92,7 +92,9 @@ namespace ModuleHeritageHub.Infrastructure.Repository
             user.FirstName = data.FirstName;
             user.LastName = data.LastName;
             user.Role = data.Role.GetValueOrDefault(UserRole.MEMBER);
-            user.ImageId = data.ImageId;
+            if (data.ImageId != null) {
+                user.ImageId = data.ImageId;
+            }
             
             await _context.SaveChangesAsync();
 

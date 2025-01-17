@@ -1,0 +1,99 @@
+﻿@page "/"
+
+@inject HttpClient Http
+@inject IConfiguration Configuration
+
+<PageTitle>Список статей</PageTitle>
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Список статей</h1>
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">
+            @errorMessage
+        </div>
+    }
+    else if (articles.Any())
+    {
+        <div class="row">
+            @foreach (var article in articles)
+            {
+                <div class="col-md-12 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="row g-0">
+                            <div class="col-md-8 p-3">
+                                <h5 class="card-title">@article.Title</h5>
+                                <p class="card-text text-muted">@article.Description</p>
+                                <a href="/articles/@article.Id" class="btn btn-primary">Подробнее</a>
+                            </div>
+                            @if (!string.IsNullOrEmpty(apiBaseAddress) && article.Images != null && article.Images.Any())
+                            {
+                                <div class="col-md-4 d-flex justify-content-end align-items-center">
+                                    <img src="@apiBaseAddress/@article.Images.First().Value" 
+                                         class="img-fluid rounded-end" 
+                                         alt="Article Image" 
+                                         style="height: 100%; object-fit: cover;">
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            Нет доступных статей.
+        </div>
+    }
+</div>
+
+@code {
+    private List<ArticleDTO> articles = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+    private string apiBaseAddress = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        apiBaseAddress = Configuration["API_BASE_ADDRESS"] ?? "";
+
+        try
+        {
+            var response = await Http.GetFromJsonAsync<List<ArticleDTO>>("/api/pages");
+            if (response != null)
+            {
+                articles = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка загрузки статей: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public class ArticleDTO
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string InfoList { get; set; } = string.Empty;
+        public string Body { get; set; } = string.Empty;
+        public DateTime LastInteractionAt { get; set; }
+        public Dictionary<string, string>? Images { get; set; }
+    }
+}
